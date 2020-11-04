@@ -1,6 +1,6 @@
 ---
 title: "PF-0953 Programación geoespacial en R<br>Tarea 03: Leaflet"
-author: "Manuel Vargas"
+author: "Esmeralda Vargas Madrigal, Jesus Monge Mejia, Jose M Zeledon Calderon"
 date: "2020-10-28"
 output:
   html_document:
@@ -41,3 +41,55 @@ Desarrolle un mapa en Leaflet con las siguientes características (el valor porc
 - (10%) Al hacer clic sobre el polígono de un cantón, debe mostrarse el nombre del cantón y la cantidad de casos correspondiente a la capa (positivos, activos, recuperados o fallecidos).
 
 Utilice la capa de cantones del Instituto Geográfico Nacional (IGN) publicada en el [Sistema Nacional de Información terrritorial (SNIT)](https://www.snitcr.go.cr/) y los [datos de COVID-19 del Ministerio de Salud](http://geovision.uned.ac.cr/oges/) del 2020-10-27 disponibles en [https://github.com/pf0953-programaciongeoespacialr-2020/datos/tree/master/covid19/ms](https://github.com/pf0953-programaciongeoespacialr-2020/datos/tree/master/covid19/ms).
+
+## Cargando las libretias necesarias:
+```{r}
+#Leaflet: 
+library(leaflet)
+#sf: 
+library(sf)
+#tidyr: 
+library(tidyr)
+#dplyr: 
+library(dplyr)
+#spData: 
+library(spData)
+```
+
+##Definicion del Mapa Base
+```{r}
+mapa_base <- leaflet() %>%
+  addTiles() %>%
+  addProviderTiles(providers$Stamen.Terrain, group = "Relieve") %>%
+  addProviderTiles(providers$Stamen.Watercolor, group = "Stamen Water color") %>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Imagenes de ESRI") %>%
+  addLayersControl(
+  baseGroups = c("OpenStreetMap", "Relieve", "Stamen Water color", "Imagenes de ESRI")
+  ) %>%
+addMiniMap(toggleDisplay = TRUE,tiles = providers$Stamen.TonerLite )
+# Despliegue del mapa
+mapa_base
+```
+# Lectura de la capa de cantones de un archivo GeoJSON
+```{r}
+# Dirección base del servicio WFS
+url_base_wfs <- "http://geos.snitcr.go.cr/be/IGN_5/wfs?"
+# Solicitud de la capa WFS:
+solicitud_wfs <- "request=GetFeature&service=WFS&version=2.0.0&typeName=IGN_5:limitecantonal_5k&outputFormat=application/json"
+# Recuperación de los datos en un data frame
+cantones <- st_read(paste0(url_base_wfs, solicitud_wfs))
+# Simplificación de las geometrías
+cantones_simp1 = st_simplify(cantones, dTolerance = 1000)
+# Transformación al CRS WGS84
+cantones <- st_transform(cantones_simp1, 4326)
+# Funciones para obtener información básica de un data frame:
+# Clase de sf_cantones
+class(cantones)
+
+```
+
+
+
+
+
+
